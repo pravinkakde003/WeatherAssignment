@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">My Weather</string>
+    <string name="error">Error</string>
+    <string name="cancel">Cancel</string>
+    <string name="internet_alert_title">NO INTERNET</string>
+    <string name="internet_alert_message">Please check your internet connection.</string>
+    <string name="ok">OK</string>
+    <string name="generic_error_message">Something went wrong.</string>
 </resources>
