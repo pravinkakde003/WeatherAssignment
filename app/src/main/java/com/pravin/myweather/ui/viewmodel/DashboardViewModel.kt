@@ -21,6 +21,7 @@ class DashboardViewModel @Inject constructor(private val weatherRepository: Weat
     val cityName = MutableLiveData<String>()
     val currentDate = MutableLiveData<String>()
     val weatherDescription = MutableLiveData<String>()
+    val weatherMinMax = MutableLiveData<String>()
 
     val weatherResponseLiveData: LiveData<NetworkResult<CurrentWeatherResponse>>
         get() = weatherRepository.weatherResponseLiveData
@@ -44,6 +45,12 @@ class DashboardViewModel @Inject constructor(private val weatherRepository: Weat
 
         if (apiResponse.weather[0].description.isNotBlank()) {
             weatherDescription.value = apiResponse.weather[0].description
+        }
+
+        if (apiResponse.main.temp_min.toString()
+                .isNotBlank() && apiResponse.main.temp_max.toString().isNotBlank()
+        ) {
+            weatherMinMax.value = "Min: "+apiResponse.main.temp_min.toString() + " | Max: "+apiResponse.main.temp_max.toString()
         }
     }
 }

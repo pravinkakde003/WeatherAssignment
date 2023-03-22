@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     private fun checkGPSPermission() {
         if (isLocationEnabled()) {
-            locationTask()
+            getLocationData()
         } else {
             showAlertDialog {
                 setTitle(context.resources.getString(R.string.important))
@@ -69,9 +69,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
-    fun locationTask() {
+    fun getLocationData() {
         if (hasLocationPermissions()) {
-            getLocation()
+            getWeatherDataLocation()
         } else {
             EasyPermissions.requestPermissions(
                 this,
@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
-        getLocation()
+        getWeatherDataLocation()
     }
 
     override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
@@ -103,7 +103,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
-    fun getLocation() {
+    fun getWeatherDataLocation() {
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this)
         mFusedLocationProviderClient.getCurrentLocation(
