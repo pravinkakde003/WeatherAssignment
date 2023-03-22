@@ -1,12 +1,23 @@
 package com.pravin.myweather.utils
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.pm.PackageManager
+import android.content.Context
 import android.location.LocationManager
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.os.Build
+import android.view.View
+import android.widget.ImageView
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
+import com.google.android.material.snackbar.Snackbar
+import com.pravin.myweather.R
+import pub.devrel.easypermissions.EasyPermissions
+import java.text.SimpleDateFormat
+import java.util.*
 
 fun Activity.isLocationEnabled(): Boolean {
     val locationManager = getSystemService(AppCompatActivity.LOCATION_SERVICE) as LocationManager
@@ -20,8 +31,72 @@ fun Activity.showToast(textToDisplay: String) {
     Toast.makeText(this, textToDisplay, Toast.LENGTH_SHORT).show()
 }
 
-fun Activity.requestPermissions(request: ActivityResultLauncher<Array<String>>, permissions: Array<String>) = request.launch(permissions)
+fun View.showSnackBar(
+    view: View,
+    msg: String,
+    length: Int,
+    actionMessage: CharSequence?,
+    action: (View) -> Unit
+) {
+    val snackBar = Snackbar.make(view, msg, length)
+    if (actionMessage != null) {
+        snackBar.setAction(actionMessage) {
+            action(this)
+        }.show()
+    } else {
+        snackBar.show()
+    }
+}
 
-fun Activity.isAllPermissionsGranted(permissions: Array<String>) = permissions.all {
-    ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED
+fun Activity.hasLocationPermissions() =
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+        EasyPermissions.hasPermissions(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+    } else {
+        EasyPermissions.hasPermissions(
+            this,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        )
+    }
+
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val nw = connectivityManager.activeNetwork ?: return false
+        val actNw = connectivityManager.getNetworkCapabilities(nw) ?: return false
+        return when {
+            actNw.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> true
+            actNw.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> true
+            actNw.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) -> true
+            actNw.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH) -> true
+            else -> false
+        }
+    } else {
+        val nwInfo = connectivityManager.activeNetworkInfo ?: return false
+        return nwInfo.isConnected
+    }
+}
+
+fun showInternetAlertDialog(context: Context) {
+    context.showAlertDialog {
+        setTitle(context.resources.getString(R.string.internet_alert_title))
+        setMessage(context.resources.getString(R.string.internet_alert_message))
+        positiveButtonClick(context.resources.getString(R.string.ok)) { }
+    }
+}
+
+@SuppressLint("SimpleDateFormat")
+fun getCurrentDateTime(dateFormat: String): String =
+    SimpleDateFormat(dateFormat).format(Date())
+
+fun setGlideImage(image: ImageView, url: String) {
+    Glide.with(image).load(url)
+        .error(R.drawable.ic_deafult_weather)
+        .into(image)
 }

@@ -9,4 +9,8 @@
 
     <string name="important">Important</string>
     <string name="enable_gps_message">Please enable location to get weather data.</string>
+    <string name="rationale_location">This app needs access to your location to get weather data.</string>
+    <string name="unable_fetch_location">Unable to fetch location.</string>
+
+    <string name="please_wait">Please wait.Getting weather data.</string>
 </resources>

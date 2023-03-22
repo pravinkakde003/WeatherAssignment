@@ -8,6 +8,7 @@ import com.pravin.myweather.api.ApiService
 import com.pravin.myweather.api.NetworkResult
 import com.pravin.myweather.model.CurrentWeatherResponse
 import com.pravin.myweather.model.ErrorModel
+import com.pravin.myweather.utils.AppConstant
 import retrofit2.Response
 import java.net.SocketTimeoutException
 import javax.inject.Inject
@@ -28,7 +29,8 @@ class WeatherRepository @Inject constructor(private val storeApiServices: ApiSer
             weatherResponseDataMutableLiveData.postValue(NetworkResult.Loading())
             val response = storeApiServices.getCurrentWeatherData(
                 latitude = latitude,
-                longitude = longitude
+                longitude = longitude,
+                unit = AppConstant.UNIT_METRIC
             )
             handleResponse(response)
         } catch (exception: Exception) {

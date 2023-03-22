@@ -1,78 +1,61 @@
 package com.pravin.myweather.ui.activity
 
 import android.Manifest
+import android.app.ProgressDialog
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.gson.Gson
 import com.pravin.myweather.R
 import com.pravin.myweather.api.NetworkResult
 import com.pravin.myweather.databinding.ActivityMainBinding
 import com.pravin.myweather.ui.viewmodel.DashboardViewModel
-import com.pravin.myweather.utils.isLocationEnabled
-import com.pravin.myweather.utils.positiveButtonClick
-import com.pravin.myweather.utils.showAlertDialog
+import com.pravin.myweather.utils.*
+import com.pravin.myweather.utils.AppConstant.LOCATION_REQUEST_CODE
 import dagger.hilt.android.AndroidEntryPoint
+import pub.devrel.easypermissions.AppSettingsDialog
+import pub.devrel.easypermissions.EasyPermissions
 
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private lateinit var binding: ActivityMainBinding
-    lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
     private val dashboardViewModel: DashboardViewModel by viewModels()
-    var PERMISSION_ALL = 1
-    var PERMISSIONS_ARRAY = arrayOf(
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
-    )
+    lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        requestLocationPermission()
-//        dashboardViewModel.getWeatherData("18.5204", "73.8567")
-        collects()
-    }
-
-
-    private fun requestLocationPermission() {
-        locationPermissionRequest.launch(
-            PERMISSIONS_ARRAY
-        )
-    }
-
-    private val locationPermissionRequest = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-        when {
-            permissions.getOrDefault(Manifest.permission.ACCESS_FINE_LOCATION, false) -> {
-                checkGPS()
-            }
-            permissions.getOrDefault(Manifest.permission.ACCESS_COARSE_LOCATION, false) -> {
-                checkGPS()
-            }
-            else -> {
-                Log.e("TAGG", "Permission denied")
-            }
+        binding.apply {
+            lifecycleOwner = this@MainActivity
+            viewModel = dashboardViewModel
         }
+        initView()
+        initObserver()
     }
 
-    private fun checkGPS() {
+    fun initView() {
+        progressDialog = ProgressDialog(this)
+        progressDialog.setTitle(getString(R.string.app_name))
+        progressDialog.setMessage(getString(R.string.please_wait))
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkGPSPermission()
+    }
+
+    private fun checkGPSPermission() {
         if (isLocationEnabled()) {
-            getLocation()
+            locationTask()
         } else {
             showAlertDialog {
                 setTitle(context.resources.getString(R.string.important))
@@ -86,6 +69,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun locationTask() {
+        if (hasLocationPermissions()) {
+            getLocation()
+        } else {
+            EasyPermissions.requestPermissions(
+                this,
+                getString(R.string.rationale_location),
+                LOCATION_REQUEST_CODE,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
+    }
+
+    override fun onPermissionsGranted(requestCode: Int, perms: MutableList<String>) {
+        getLocation()
+    }
+
+    override fun onPermissionsDenied(requestCode: Int, perms: MutableList<String>) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            AppSettingsDialog.Builder(this).build().show()
+        } else {
+            checkGPSPermission()
+        }
+    }
+
     fun getLocation() {
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -94,32 +111,37 @@ class MainActivity : AppCompatActivity() {
             CancellationTokenSource().token
         ).addOnSuccessListener { location ->
             if (location != null) {
-                val lat: Double = location.latitude
-                val longt: Double = location.longitude
-                Log.e("TAG", "Lat: " + lat)
-                Log.e("TAG", "Long: " + longt)
+                if (isNetworkAvailable(this)) {
+                    dashboardViewModel.getWeatherData(
+                        latitude = location.latitude.toString(),
+                        longitude = location.longitude.toString()
+                    )
+                } else {
+                    showInternetAlertDialog(this)
+                }
             } else {
-                //don't be confused with AlertDialoBox because
-                //this our alerbox written by me you can write own alerbox to show the //message
-//                        Common.AlertDialogBox(
-//                            getContext(), "Fetching location ",
-//                            getString(R.string.fetchingerror)
-//                        )
+                showAlertDialog {
+                    setTitle(context.resources.getString(R.string.important))
+                    setMessage(context.resources.getString(R.string.unable_fetch_location))
+                    positiveButtonClick(context.resources.getString(R.string.ok)) {}
+                }
             }
         }.addOnFailureListener { e ->
-            val message = e.message
-            val title = "Location fetching exception"
-//                    Common.AlertDialogBox(this, title, message)
+            showAlertDialog {
+                setTitle(context.resources.getString(R.string.important))
+                setMessage(e.message)
+                positiveButtonClick(context.resources.getString(R.string.ok)) {}
+            }
         }
     }
 
-    private fun collects() {
+    private fun initObserver() {
         lifecycleScope.launchWhenCreated {
             dashboardViewModel.weatherResponseLiveData.observe(this@MainActivity) { responseData ->
-//                progressDialog.hide()
+                progressDialog.dismiss()
                 when (responseData) {
                     is NetworkResult.Loading -> {
-//                        progressDialog.show()
+                        progressDialog.show()
                     }
                     is NetworkResult.Error -> {
                         showAlertDialog {
@@ -132,16 +154,11 @@ class MainActivity : AppCompatActivity() {
                         responseData.data?.let {
                             val apiResponse = responseData.data
                             if (null != apiResponse) {
-
-                                Log.e("TAGG", Gson().toJson(apiResponse))
-//                                if (apiResponse.data.isNotEmpty()) {
-//                                    val preparedList =
-//                                        daySalesReconViewModel.getPreparedItemList(apiResponse.data)
-//                                    dayReconRecyclerViewAdapter.items = preparedList
-//                                } else {
-//                                    binding.withDataLayout.visibility = View.GONE
-//                                    binding.noDataLayout.visibility = View.VISIBLE
-//                                }
+                                dashboardViewModel.setData(apiResponse)
+                                setGlideImage(
+                                    binding.imageViewWeatherIcon,
+                                    AppConstant.WEATHER_API_IMAGE_ENDPOINT + "${apiResponse.weather[0].icon}@4x.png"
+                                )
                             } else {
                                 showAlertDialog {
                                     setTitle(context.resources.getString(R.string.error))
