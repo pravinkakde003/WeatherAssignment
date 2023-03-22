@@ -71,7 +71,8 @@ class DashboardViewModel @Inject constructor(private val weatherRepository: Weat
         }
 
         if (apiResponse.visibility.toString().isNotBlank()) {
-            visibility.value = apiResponse.visibility.toString()
+            val visibilityInKm = apiResponse.visibility / 1000
+            visibility.value = visibilityInKm.toString()
         }
     }
 }

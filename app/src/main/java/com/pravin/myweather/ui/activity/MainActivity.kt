@@ -1,10 +1,15 @@
 package com.pravin.myweather.ui.activity
 
 import android.Manifest
+import android.app.Activity
 import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
+import android.view.Menu
+import android.view.MenuItem
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -15,9 +20,11 @@ import com.google.android.gms.tasks.CancellationTokenSource
 import com.pravin.myweather.R
 import com.pravin.myweather.api.NetworkResult
 import com.pravin.myweather.databinding.ActivityMainBinding
+import com.pravin.myweather.model.CurrentWeatherResponse
 import com.pravin.myweather.ui.viewmodel.DashboardViewModel
 import com.pravin.myweather.utils.*
 import com.pravin.myweather.utils.AppConstant.LOCATION_REQUEST_CODE
+import com.pravin.myweather.utils.AppConstant.RESPONSE_OBJECT_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
@@ -40,6 +47,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
         initView()
         initObserver()
+        checkGPSPermission()
     }
 
     fun initView() {
@@ -48,10 +56,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         progressDialog.setMessage(getString(R.string.please_wait))
     }
 
-    override fun onResume() {
-        super.onResume()
-        checkGPSPermission()
-    }
 
     private fun checkGPSPermission() {
         if (isLocationEnabled()) {
@@ -154,11 +158,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                         responseData.data?.let {
                             val apiResponse = responseData.data
                             if (null != apiResponse) {
-                                dashboardViewModel.setData(apiResponse)
-                                setGlideImage(
-                                    binding.imageViewWeatherIcon,
-                                    AppConstant.WEATHER_API_IMAGE_ENDPOINT + "${apiResponse.weather[0].icon}@4x.png"
-                                )
+                                updateUI(apiResponse)
                             } else {
                                 showAlertDialog {
                                     setTitle(context.resources.getString(R.string.error))
@@ -171,5 +171,40 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
                 }
             }
         }
+    }
+
+    private fun updateUI(apiResponse: CurrentWeatherResponse) {
+        dashboardViewModel.setData(apiResponse)
+        setGlideImage(
+            binding.imageViewWeatherIcon,
+            AppConstant.WEATHER_API_IMAGE_ENDPOINT + "${apiResponse.weather[0].icon}@4x.png"
+        )
+    }
+
+    private val startForResult = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+            data?.let {
+                val dataObject: CurrentWeatherResponse =
+                    data.getSerializableExtra(RESPONSE_OBJECT_KEY) as CurrentWeatherResponse
+                updateUI(dataObject)
+            }
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.navigation_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        if (id == R.id.search) {
+            startForResult.launch(Intent(this, SearchActivity::class.java))
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 }

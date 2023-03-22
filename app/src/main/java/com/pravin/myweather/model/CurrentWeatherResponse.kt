@@ -1,5 +1,7 @@
 package com.pravin.myweather.model
 
+import java.io.Serializable
+
 data class CurrentWeatherResponse(
     val base: String,
     val clouds: Clouds,
@@ -14,4 +16,4 @@ data class CurrentWeatherResponse(
     val visibility: Int,
     val weather: List<Weather>,
     val wind: Wind
-)
+) : Serializable

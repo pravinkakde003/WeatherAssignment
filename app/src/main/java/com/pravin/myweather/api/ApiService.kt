@@ -14,4 +14,10 @@ interface ApiService {
         @Query("lon") longitude: String,
         @Query("units") unit: String
     ): Response<CurrentWeatherResponse>
+
+    @GET(AppConstant.WEATHER + BuildConfig.API_KEY)
+    suspend fun getCurrentWeatherDataForCity(
+        @Query("q") cityName: String,
+        @Query("units") unit: String
+    ): Response<CurrentWeatherResponse>
 }

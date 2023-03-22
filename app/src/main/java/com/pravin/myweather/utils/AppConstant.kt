@@ -10,4 +10,6 @@ object AppConstant {
     const val UNIT_METRIC = "metric"
     const val DATE_FORMAT = "E, d MMM yyyy"
     const val WEATHER_API_IMAGE_ENDPOINT = "http://openweathermap.org/img/wn/"
+
+    const val RESPONSE_OBJECT_KEY = "response_object_key"
 }

@@ -18,4 +18,8 @@
     <string name="pressure">Pressure</string>
     <string name="humidity">Humidity</string>
     <string name="visibility">Visibility</string>
+
+    <string name="search">Search</string>
+    <string name="search_hint">Search by city name</string>
+    <string name="search_result">Search_result</string>
 </resources>

@@ -9,11 +9,11 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.google.android.material.snackbar.Snackbar
 import com.pravin.myweather.R
 import pub.devrel.easypermissions.EasyPermissions
 import java.text.SimpleDateFormat
@@ -29,23 +29,6 @@ fun Activity.isLocationEnabled(): Boolean {
 fun Activity.showToast(textToDisplay: String) {
     if (textToDisplay.isBlank()) return
     Toast.makeText(this, textToDisplay, Toast.LENGTH_SHORT).show()
-}
-
-fun View.showSnackBar(
-    view: View,
-    msg: String,
-    length: Int,
-    actionMessage: CharSequence?,
-    action: (View) -> Unit
-) {
-    val snackBar = Snackbar.make(view, msg, length)
-    if (actionMessage != null) {
-        snackBar.setAction(actionMessage) {
-            action(this)
-        }.show()
-    } else {
-        snackBar.show()
-    }
 }
 
 fun Activity.hasLocationPermissions() =
@@ -99,4 +82,14 @@ fun setGlideImage(image: ImageView, url: String) {
     Glide.with(image).load(url)
         .error(R.drawable.ic_deafult_weather)
         .into(image)
+}
+
+fun hideKeyboard(view: View) {
+    try {
+        val imm =
+            view.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(view.windowToken, 0)
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
