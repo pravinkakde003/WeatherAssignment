@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">My Weather</string>
     <string name="error">Error</string>
-    <string name="cancel">Cancel</string>
     <string name="internet_alert_title">NO INTERNET</string>
     <string name="internet_alert_message">Please check your internet connection.</string>
     <string name="ok">OK</string>
@@ -12,7 +11,6 @@
     <string name="rationale_location">This app needs access to your location to get weather data.</string>
     <string name="unable_fetch_location">Unable to fetch location.</string>
     <string name="weather_now">Weather now</string>
-    <string name="please_wait">Please wait.Getting weather data.</string>
 
     <string name="feels_like">Feels like</string>
     <string name="pressure">Pressure</string>
