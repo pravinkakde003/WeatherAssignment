@@ -11,7 +11,6 @@ import android.os.Build
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.pravin.myweather.R
@@ -24,11 +23,6 @@ fun Activity.isLocationEnabled(): Boolean {
     return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
         LocationManager.NETWORK_PROVIDER
     )
-}
-
-fun Activity.showToast(textToDisplay: String) {
-    if (textToDisplay.isBlank()) return
-    Toast.makeText(this, textToDisplay, Toast.LENGTH_SHORT).show()
 }
 
 fun Activity.hasLocationPermissions() =

@@ -2,12 +2,12 @@ package com.pravin.myweather.ui.activity
 
 import android.Manifest
 import android.app.Activity
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -35,7 +35,6 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private lateinit var binding: ActivityMainBinding
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
     private val dashboardViewModel: DashboardViewModel by viewModels()
-    lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,12 +49,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         checkGPSPermission()
     }
 
-    fun initView() {
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle(getString(R.string.app_name))
-        progressDialog.setMessage(getString(R.string.please_wait))
+    private fun initView() {
+        dashboardViewModel.isWithData.value = false
+        dashboardViewModel.isWithNoData.value = false
     }
-
 
     private fun checkGPSPermission() {
         if (isLocationEnabled()) {
@@ -73,7 +70,21 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
-    fun getLocationData() {
+    override fun onResume() {
+        super.onResume()
+        if (!isLocationEnabled()) {
+            showRetryLayout()
+        }
+    }
+
+    private fun showRetryLayout() {
+        dashboardViewModel.isWithNoData.value = true
+        binding.includedNoDataLayout.buttonRetry.setOnClickListener {
+            checkGPSPermission()
+        }
+    }
+
+    private fun getLocationData() {
         if (hasLocationPermissions()) {
             getWeatherDataLocation()
         } else {
@@ -107,7 +118,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
-    fun getWeatherDataLocation() {
+    private fun getWeatherDataLocation() {
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this)
         mFusedLocationProviderClient.getCurrentLocation(
@@ -116,11 +127,13 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         ).addOnSuccessListener { location ->
             if (location != null) {
                 if (isNetworkAvailable(this)) {
+                    binding.progressBar.visibility = View.GONE
                     dashboardViewModel.getWeatherData(
                         latitude = location.latitude.toString(),
                         longitude = location.longitude.toString()
                     )
                 } else {
+                    showRetryLayout()
                     showInternetAlertDialog(this)
                 }
             } else {
@@ -142,10 +155,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private fun initObserver() {
         lifecycleScope.launchWhenCreated {
             dashboardViewModel.weatherResponseLiveData.observe(this@MainActivity) { responseData ->
-                progressDialog.dismiss()
+                binding.progressBar.visibility = View.GONE
                 when (responseData) {
                     is NetworkResult.Loading -> {
-                        progressDialog.show()
+                        binding.progressBar.visibility = View.VISIBLE
                     }
                     is NetworkResult.Error -> {
                         showAlertDialog {
@@ -174,9 +187,11 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     private fun updateUI(apiResponse: CurrentWeatherResponse) {
+        dashboardViewModel.isWithNoData.value = false
+        dashboardViewModel.isWithData.value = true
         dashboardViewModel.setData(apiResponse)
         setGlideImage(
-            binding.imageViewWeatherIcon,
+            binding.includedDataLayout.imageViewWeatherIcon,
             AppConstant.WEATHER_API_IMAGE_ENDPOINT + "${apiResponse.weather[0].icon}@4x.png"
         )
     }
@@ -200,8 +215,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val id = item.itemId
-        if (id == R.id.search) {
+        if (item.itemId == R.id.search) {
             startForResult.launch(Intent(this, SearchActivity::class.java))
             return true
         }

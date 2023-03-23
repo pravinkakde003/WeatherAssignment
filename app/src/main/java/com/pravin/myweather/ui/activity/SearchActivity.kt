@@ -1,9 +1,7 @@
 package com.pravin.myweather.ui.activity
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
-import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView.OnEditorActionListener
@@ -24,7 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class SearchActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySearchBinding
-    lateinit var progressDialog: ProgressDialog
     private val searchCityViewModel: SearchCityViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,14 +56,13 @@ class SearchActivity : AppCompatActivity() {
         })
     }
 
-    fun initView() {
-        progressDialog = ProgressDialog(this)
-        progressDialog.setTitle(getString(R.string.app_name))
-        progressDialog.setMessage(getString(R.string.please_wait))
+    private fun initView() {
         setVisibility(View.GONE)
-        var actionBar = supportActionBar
-        actionBar?.setDisplayHomeAsUpEnabled(true)
-        actionBar?.title = resources.getString(R.string.search)
+        val actionBar = supportActionBar
+        actionBar?.let {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.title = resources.getString(R.string.search)
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -82,10 +78,10 @@ class SearchActivity : AppCompatActivity() {
     private fun initObserver() {
         lifecycleScope.launchWhenCreated {
             searchCityViewModel.weatherResponseLiveData.observe(this@SearchActivity) { responseData ->
-                progressDialog.dismiss()
+                binding.progressBar.visibility = View.GONE
                 when (responseData) {
                     is NetworkResult.Loading -> {
-                        progressDialog.show()
+                        binding.progressBar.visibility = View.VISIBLE
                     }
                     is NetworkResult.Error -> {
                         showAlertDialog {

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="viewModel"
+            type="com.pravin.myweather.ui.viewmodel.DashboardViewModel" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/textCityName"
+            style="@style/TextViewHeaderStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:text="@{ viewModel.cityName }"
+            android:textSize="@dimen/text_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/textViewDate"
+            style="@style/TextViewNormalStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@{ viewModel.currentDate }"
+            android:textSize="@dimen/text_14"
+            app:layout_constraintStart_toStartOf="@+id/textCityName"
+            app:layout_constraintTop_toBottomOf="@+id/textCityName" />
+
+        <ImageView
+            android:id="@+id/imageViewWeatherIcon"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textViewDate" />
+
+        <TextView
+            android:id="@+id/text_temperature"
+            style="@style/TextViewHeaderStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@{ viewModel.currentTemp }"
+            android:textSize="@dimen/text_72"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/imageViewWeatherIcon" />
+
+        <TextView
+            android:id="@+id/text_label_degree"
+            style="@style/TextViewBodyStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="\u2103"
+            android:textSize="@dimen/text_20"
+            app:layout_constraintStart_toEndOf="@+id/text_temperature"
+            app:layout_constraintTop_toTopOf="@+id/text_temperature" />
+
+        <TextView
+            android:id="@+id/textWeatherDescription"
+            style="@style/TextViewNormalStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@{ viewModel.weatherDescription }"
+            android:textSize="@dimen/text_18"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_temperature" />
+
+        <TextView
+            android:id="@+id/textWeatherMinMax"
+            style="@style/TextViewNormalStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@{ viewModel.weatherMinMax }"
+            android:textSize="@dimen/text_12"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textWeatherDescription" />
+
+        <TextView
+            android:id="@+id/textWeatherNow"
+            style="@style/TextViewHeaderStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="@dimen/size_24dp"
+            android:text="@string/weather_now"
+            android:textSize="@dimen/text_24"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textWeatherMinMax" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutFeelsLike"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/size_12"
+            android:background="@color/white"
+            android:padding="@dimen/size_10"
+            app:layout_constraintEnd_toStartOf="@+id/layoutPressure"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/textWeatherNow">
+
+            <ImageView
+                android:id="@+id/imageViewFeelsLike"
+                android:layout_width="@dimen/size_24dp"
+                android:layout_height="@dimen/size_24dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_feels_like"
+                app:tint="@color/sky_blue" />
+
+            <TextView
+                android:id="@+id/textViewFeelsLike"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:text="@string/feels_like"
+                android:textColor="@color/color_light_gray"
+                android:textSize="@dimen/text_16"
+                app:layout_constraintStart_toEndOf="@id/imageViewFeelsLike"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textViewFeelsLikeValue"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:layout_marginTop="@dimen/size_4"
+                android:text="@{ viewModel.feelsLike+'\u2103' }"
+                android:textColor="@color/color_gray"
+                android:textSize="@dimen/text_20"
+                app:layout_constraintStart_toEndOf="@id/imageViewFeelsLike"
+                app:layout_constraintTop_toBottomOf="@id/textViewFeelsLike" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutPressure"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/size_2"
+            android:layout_marginTop="@dimen/size_12"
+            android:background="@color/white"
+            android:padding="@dimen/size_10"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/layoutFeelsLike"
+            app:layout_constraintTop_toBottomOf="@+id/textWeatherNow">
+
+            <ImageView
+                android:id="@+id/imageViewPressure"
+                android:layout_width="@dimen/size_24dp"
+                android:layout_height="@dimen/size_24dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_pressure"
+                app:tint="@color/sky_blue" />
+
+            <TextView
+                android:id="@+id/textViewPressure"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:text="@string/pressure"
+                android:textColor="@color/color_light_gray"
+                android:textSize="@dimen/text_16"
+                app:layout_constraintStart_toEndOf="@id/imageViewPressure"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textViewPressureValue"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:layout_marginTop="@dimen/size_4"
+                android:text="@{ viewModel.pressure+` hpa`}"
+                android:textColor="@color/color_gray"
+                android:textSize="@dimen/text_20"
+                app:layout_constraintStart_toEndOf="@id/imageViewPressure"
+                app:layout_constraintTop_toBottomOf="@id/textViewPressure" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutHumidity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/size_2"
+            android:background="@color/white"
+            android:padding="@dimen/size_10"
+            app:layout_constraintEnd_toStartOf="@+id/layoutVisibility"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/layoutFeelsLike">
+
+            <ImageView
+                android:id="@+id/imageViewHumidity"
+                android:layout_width="@dimen/size_24dp"
+                android:layout_height="@dimen/size_24dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_humidity"
+                app:tint="@color/sky_blue" />
+
+            <TextView
+                android:id="@+id/textViewHumidity"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:text="@string/humidity"
+                android:textColor="@color/color_light_gray"
+                android:textSize="@dimen/text_16"
+                app:layout_constraintStart_toEndOf="@id/imageViewHumidity"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textViewHumidityValue"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:layout_marginTop="@dimen/size_4"
+                android:text="@{ viewModel.humidity+'%' }"
+                android:textColor="@color/color_gray"
+                android:textSize="@dimen/text_20"
+                app:layout_constraintStart_toEndOf="@id/imageViewHumidity"
+                app:layout_constraintTop_toBottomOf="@id/textViewHumidity" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutVisibility"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/size_2"
+            android:layout_marginTop="@dimen/size_2"
+            android:background="@color/white"
+            android:padding="@dimen/size_10"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/layoutHumidity"
+            app:layout_constraintTop_toBottomOf="@+id/layoutFeelsLike">
+
+            <ImageView
+                android:id="@+id/imageViewVisibility"
+                android:layout_width="@dimen/size_24dp"
+                android:layout_height="@dimen/size_24dp"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_visibility"
+                app:tint="@color/sky_blue" />
+
+            <TextView
+                android:id="@+id/textViewVisibility"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:text="@string/visibility"
+                android:textColor="@color/color_light_gray"
+                android:textSize="@dimen/text_16"
+                app:layout_constraintStart_toEndOf="@id/imageViewVisibility"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/textViewVisibilityValue"
+                style="@style/TextViewNormalStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/size_12"
+                android:layout_marginTop="@dimen/size_4"
+                android:text="@{ viewModel.visibility+` km`}"
+                android:textColor="@color/color_gray"
+                android:textSize="@dimen/text_20"
+                app:layout_constraintStart_toEndOf="@id/imageViewVisibility"
+                app:layout_constraintTop_toBottomOf="@id/textViewVisibility" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
