@@ -29,12 +29,16 @@ import com.pravin.myweather.utils.AppConstant.RESPONSE_OBJECT_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private lateinit var binding: ActivityMainBinding
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
     private val dashboardViewModel: DashboardViewModel by viewModels()
+
+    @Inject
+    lateinit var preferenceManager: PreferenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +50,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
         initView()
         initObserver()
-        checkGPSPermission()
+        checkStoredCityData()
     }
 
     /**
@@ -55,6 +59,22 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private fun initView() {
         dashboardViewModel.isWithData.value = false
         dashboardViewModel.isWithNoData.value = false
+        binding.includedDataLayout.imageViewRefreshIcon.setOnClickListener {
+            binding.progressBar.visibility = View.VISIBLE
+            checkGPSPermission()
+        }
+    }
+
+    /**
+     * Check for stored city data
+     */
+    private fun checkStoredCityData() {
+        val storedCityObject = preferenceManager.getSelectedStoreObject()
+        if (null != storedCityObject) {
+            updateUI(storedCityObject)
+        } else {
+            checkGPSPermission()
+        }
     }
 
     /**
@@ -238,9 +258,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.search) {
-            startForResult.launch(Intent(this, SearchActivity::class.java))
-            return true
+        when (item.itemId) {
+            R.id.search -> {
+                startForResult.launch(Intent(this, SearchActivity::class.java))
+                return true
+            }
+            R.id.delete -> {
+                preferenceManager.clearAllData()
+                checkGPSPermission()
+                return true
+            }
         }
         return super.onOptionsItemSelected(item)
     }

@@ -84,7 +84,6 @@ dependencies {
             "pub.devrel:easypermissions:$easypermissions_version",
             "com.github.bumptech.glide:glide:$glide_version"
 
-
     kapt("com.google.dagger:hilt-android-compiler:$daggerHilt_version")
     kapt("androidx.room:room-compiler:$room_version")
     testImplementation 'junit:junit:4.13.2'

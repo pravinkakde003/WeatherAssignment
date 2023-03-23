@@ -21,10 +21,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="24dp"
             android:text="@{ viewModel.weatherCondition.name }"
             android:textSize="@dimen/text_24"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imageViewRefreshIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginStart="6dp"
+            android:clickable="true"
+            android:contentDescription="@string/refresh_data"
+            android:focusable="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_baseline_refresh_24"
+            app:layout_constraintStart_toEndOf="@+id/textCityName"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -291,8 +303,6 @@
                 app:layout_constraintStart_toEndOf="@id/imageViewVisibility"
                 app:layout_constraintTop_toBottomOf="@id/textViewVisibility" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>

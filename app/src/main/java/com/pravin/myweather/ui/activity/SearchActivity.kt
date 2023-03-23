@@ -13,16 +13,21 @@ import com.pravin.myweather.api.NetworkResult
 import com.pravin.myweather.databinding.ActivitySearchBinding
 import com.pravin.myweather.ui.viewmodel.SearchCityViewModel
 import com.pravin.myweather.utils.AppConstant.RESPONSE_OBJECT_KEY
+import com.pravin.myweather.utils.PreferenceManager
 import com.pravin.myweather.utils.hideKeyboard
 import com.pravin.myweather.utils.positiveButtonClick
 import com.pravin.myweather.utils.showAlertDialog
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
 class SearchActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivitySearchBinding
     private val searchCityViewModel: SearchCityViewModel by viewModels()
+
+    @Inject
+    lateinit var preferenceManager: PreferenceManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -117,6 +122,7 @@ class SearchActivity : AppCompatActivity(), View.OnClickListener {
                 searchCityViewModel.getWeatherDataForCity(binding.searchEditText.text.toString())
             }
             binding.layoutResult -> {
+                preferenceManager.saveCityWeatherObject(searchCityViewModel.getApiResponseObject())
                 val intent = Intent()
                 intent.putExtra(RESPONSE_OBJECT_KEY, searchCityViewModel.getApiResponseObject())
                 setResult(RESULT_OK, intent)
