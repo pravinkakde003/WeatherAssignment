@@ -7,6 +7,5 @@ import dagger.hilt.android.HiltAndroidApp
 class MyWeather : Application() {
     override fun onCreate() {
         super.onCreate()
-
     }
 }

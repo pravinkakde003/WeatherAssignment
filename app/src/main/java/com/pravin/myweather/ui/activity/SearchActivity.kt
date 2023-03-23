@@ -20,7 +20,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
-class SearchActivity : AppCompatActivity() {
+class SearchActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var binding: ActivitySearchBinding
     private val searchCityViewModel: SearchCityViewModel by viewModels()
 
@@ -34,18 +34,20 @@ class SearchActivity : AppCompatActivity() {
         }
         initView()
         initObserver()
-        binding.searchTextView.setOnClickListener {
-            hideKeyboard(binding.root)
-            searchCityViewModel.getWeatherDataForCity(binding.searchEditText.text.toString())
-        }
+    }
 
-        binding.layoutResult.setOnClickListener {
-            val intent = Intent()
-            intent.putExtra(RESPONSE_OBJECT_KEY, searchCityViewModel.getApiResponseObject())
-            setResult(RESULT_OK, intent)
-            finish()
+    /**
+     * Initialize the initial state of view
+     */
+    private fun initView() {
+        setVisibility(View.GONE)
+        val actionBar = supportActionBar
+        actionBar?.let {
+            actionBar.setDisplayHomeAsUpEnabled(true)
+            actionBar.title = resources.getString(R.string.search)
         }
-
+        binding.searchTextView.setOnClickListener(this)
+        binding.layoutResult.setOnClickListener(this)
         binding.searchEditText.setOnEditorActionListener(OnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 hideKeyboard(binding.root)
@@ -56,25 +58,23 @@ class SearchActivity : AppCompatActivity() {
         })
     }
 
-    private fun initView() {
-        setVisibility(View.GONE)
-        val actionBar = supportActionBar
-        actionBar?.let {
-            actionBar.setDisplayHomeAsUpEnabled(true)
-            actionBar.title = resources.getString(R.string.search)
-        }
-    }
-
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
 
+    /**
+     * Set layout visibility
+     * @param visibility Boolean value to show/hide view
+     */
     private fun setVisibility(visibility: Int) {
         binding.textSearchResult.visibility = visibility
         binding.layoutResult.visibility = visibility
     }
 
+    /**
+     * Init observer for api response
+     */
     private fun initObserver() {
         lifecycleScope.launchWhenCreated {
             searchCityViewModel.weatherResponseLiveData.observe(this@SearchActivity) { responseData ->
@@ -106,6 +106,21 @@ class SearchActivity : AppCompatActivity() {
                         }
                     }
                 }
+            }
+        }
+    }
+
+    override fun onClick(view: View?) {
+        when (view) {
+            binding.searchTextView -> {
+                hideKeyboard(binding.root)
+                searchCityViewModel.getWeatherDataForCity(binding.searchEditText.text.toString())
+            }
+            binding.layoutResult -> {
+                val intent = Intent()
+                intent.putExtra(RESPONSE_OBJECT_KEY, searchCityViewModel.getApiResponseObject())
+                setResult(RESULT_OK, intent)
+                finish()
             }
         }
     }

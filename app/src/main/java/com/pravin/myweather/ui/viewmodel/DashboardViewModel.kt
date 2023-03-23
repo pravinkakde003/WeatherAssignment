@@ -17,23 +17,19 @@ import javax.inject.Inject
 @HiltViewModel
 class DashboardViewModel @Inject constructor(private val weatherRepository: WeatherRepository) :
     ViewModel() {
-    val currentTemp = MutableLiveData<String>()
-    val cityName = MutableLiveData<String>()
+    val weatherCondition = MutableLiveData<CurrentWeatherResponse>()
     val currentDate = MutableLiveData<String>()
-    val weatherDescription = MutableLiveData<String>()
-    val weatherMinMax = MutableLiveData<String>()
-    val feelsLike = MutableLiveData<String>()
-    val pressure = MutableLiveData<String>()
-    val humidity = MutableLiveData<String>()
-    val visibility = MutableLiveData<String>()
-
     val isWithData = MutableLiveData<Boolean>()
     val isWithNoData = MutableLiveData<Boolean>()
-
 
     val weatherResponseLiveData: LiveData<NetworkResult<CurrentWeatherResponse>>
         get() = weatherRepository.weatherResponseLiveData
 
+    /**
+     * Call API and get weather data
+     * @param latitude
+     * @param longitude
+     */
     fun getWeatherData(
         latitude: String,
         longitude: String
@@ -41,42 +37,12 @@ class DashboardViewModel @Inject constructor(private val weatherRepository: Weat
         weatherRepository.getCurrentWeatherData(latitude = latitude, longitude = longitude)
     }
 
+    /**
+     * Set data to livedata Variables
+     * @param apiResponse CurrentWeatherResponse response object
+     */
     fun setData(apiResponse: CurrentWeatherResponse) {
-        if (apiResponse.main.temp.toString().isNotBlank()) {
-            currentTemp.value = apiResponse.main.temp.toString()
-        }
-        if (apiResponse.name.isNotBlank()) {
-            cityName.value = apiResponse.name
-        }
-
+        weatherCondition.value = apiResponse
         currentDate.value = getCurrentDateTime(AppConstant.DATE_FORMAT)
-
-        if (apiResponse.weather[0].description.isNotBlank()) {
-            weatherDescription.value = apiResponse.weather[0].description
-        }
-
-        if (apiResponse.main.temp_min.toString()
-                .isNotBlank() && apiResponse.main.temp_max.toString().isNotBlank()
-        ) {
-            weatherMinMax.value =
-                "Min: " + apiResponse.main.temp_min.toString() + " | Max: " + apiResponse.main.temp_max.toString()
-        }
-
-        if (apiResponse.main.feels_like.toString().isNotBlank()) {
-            feelsLike.value = apiResponse.main.feels_like.toString()
-        }
-
-        if (apiResponse.main.pressure.toString().isNotBlank()) {
-            pressure.value = apiResponse.main.pressure.toString()
-        }
-
-        if (apiResponse.main.humidity.toString().isNotBlank()) {
-            humidity.value = apiResponse.main.humidity.toString()
-        }
-
-        if (apiResponse.visibility.toString().isNotBlank()) {
-            val visibilityInKm = apiResponse.visibility / 1000
-            visibility.value = visibilityInKm.toString()
-        }
     }
 }

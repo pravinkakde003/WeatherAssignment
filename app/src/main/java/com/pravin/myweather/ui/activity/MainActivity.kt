@@ -17,6 +17,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
+import com.pravin.myweather.BuildConfig
 import com.pravin.myweather.R
 import com.pravin.myweather.api.NetworkResult
 import com.pravin.myweather.databinding.ActivityMainBinding
@@ -28,7 +29,6 @@ import com.pravin.myweather.utils.AppConstant.RESPONSE_OBJECT_KEY
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
-
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
@@ -49,11 +49,18 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         checkGPSPermission()
     }
 
+    /**
+     * Initialize the initial state of view
+     */
     private fun initView() {
         dashboardViewModel.isWithData.value = false
         dashboardViewModel.isWithNoData.value = false
     }
 
+    /**
+     * Check for GPS enable or not
+     * if not navigate user to setting to enable GPS
+     */
     private fun checkGPSPermission() {
         if (isLocationEnabled()) {
             getLocationData()
@@ -77,6 +84,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    /**
+     * Retry view
+     */
     private fun showRetryLayout() {
         dashboardViewModel.isWithNoData.value = true
         binding.includedNoDataLayout.buttonRetry.setOnClickListener {
@@ -84,6 +94,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    /**
+     * Get location if user have permission else ask for location permission
+     */
     private fun getLocationData() {
         if (hasLocationPermissions()) {
             getWeatherDataLocation()
@@ -118,6 +131,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    /**
+     * Get weather data by using LocationServices and call API to get data
+     */
     private fun getWeatherDataLocation() {
         mFusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(this)
@@ -152,6 +168,9 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    /**
+     * Init observer for api response
+     */
     private fun initObserver() {
         lifecycleScope.launchWhenCreated {
             dashboardViewModel.weatherResponseLiveData.observe(this@MainActivity) { responseData ->
@@ -186,13 +205,17 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
+    /**
+     * Update UI
+     * @param apiResponse CurrentWeatherResponse response object
+     */
     private fun updateUI(apiResponse: CurrentWeatherResponse) {
         dashboardViewModel.isWithNoData.value = false
         dashboardViewModel.isWithData.value = true
         dashboardViewModel.setData(apiResponse)
         setGlideImage(
             binding.includedDataLayout.imageViewWeatherIcon,
-            AppConstant.WEATHER_API_IMAGE_ENDPOINT + "${apiResponse.weather[0].icon}@4x.png"
+            BuildConfig.WEATHER_API_IMAGE_ENDPOINT + "${apiResponse.weather[0].icon}@4x.png"
         )
     }
 
