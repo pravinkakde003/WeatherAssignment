@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -60,7 +59,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         dashboardViewModel.isWithData.value = false
         dashboardViewModel.isWithNoData.value = false
         binding.includedDataLayout.imageViewRefreshIcon.setOnClickListener {
-            binding.progressBar.visibility = View.VISIBLE
+            dashboardViewModel.isShowLoading.value = true
             checkGPSPermission()
         }
     }
@@ -110,6 +109,8 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private fun showRetryLayout() {
         dashboardViewModel.isWithNoData.value = true
         binding.includedNoDataLayout.buttonRetry.setOnClickListener {
+            dashboardViewModel.isWithNoData.value = false
+            dashboardViewModel.isShowLoading.value = true
             checkGPSPermission()
         }
     }
@@ -163,7 +164,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         ).addOnSuccessListener { location ->
             if (location != null) {
                 if (isNetworkAvailable(this)) {
-                    binding.progressBar.visibility = View.GONE
+                    dashboardViewModel.isShowLoading.value = true
                     dashboardViewModel.getWeatherData(
                         latitude = location.latitude.toString(),
                         longitude = location.longitude.toString()
@@ -194,10 +195,10 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     private fun initObserver() {
         lifecycleScope.launchWhenCreated {
             dashboardViewModel.weatherResponseLiveData.observe(this@MainActivity) { responseData ->
-                binding.progressBar.visibility = View.GONE
+                dashboardViewModel.isShowLoading.value = false
                 when (responseData) {
                     is NetworkResult.Loading -> {
-                        binding.progressBar.visibility = View.VISIBLE
+                        dashboardViewModel.isShowLoading.value = true
                     }
                     is NetworkResult.Error -> {
                         showAlertDialog {

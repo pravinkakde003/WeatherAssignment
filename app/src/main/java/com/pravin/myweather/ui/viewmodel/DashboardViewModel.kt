@@ -21,6 +21,7 @@ class DashboardViewModel @Inject constructor(private val weatherRepository: Weat
     val currentDate = MutableLiveData<String>()
     val isWithData = MutableLiveData<Boolean>()
     val isWithNoData = MutableLiveData<Boolean>()
+    val isShowLoading = MutableLiveData<Boolean>()
 
     val weatherResponseLiveData: LiveData<NetworkResult<CurrentWeatherResponse>>
         get() = weatherRepository.weatherResponseLiveData
