@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         dashboardViewModel.isWithData.value = false
         dashboardViewModel.isWithNoData.value = false
         binding.includedDataLayout.imageViewRefreshIcon.setOnClickListener {
+            dashboardViewModel.isWithData.value = false
             dashboardViewModel.isShowLoading.value = true
             checkGPSPermission()
         }
